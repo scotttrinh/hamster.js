@@ -1,5 +1,5 @@
 /*
- * Hamster.js v1.0.3
+ * Hamster.js v1.0.4
  * (c) 2013 Monospaced http://monospaced.com
  * License: MIT
  */
@@ -25,12 +25,12 @@ Hamster.ADD_EVENT = 'addEventListener';
 Hamster.REMOVE_EVENT = 'removeEventListener';
 Hamster.PREFIX = '';
 
-// until browser inconistencies have been fixed...
+// until browser inconsistencies have been fixed...
 Hamster.READY = false;
 
 Hamster.Instance = function(element){
   if (!Hamster.READY) {
-    // fix browser inconistencies
+    // fix browser inconsistencies
     Hamster.normalise.browser();
 
     // Hamster is ready...!
@@ -142,19 +142,25 @@ Hamster.event = {
    * @param   {Boolean}     useCapture
    */
   remove: function remove(hamster, eventName, handler, useCapture){
-    // search for handler on the instance
+    // find the normalised handler on the instance
     var originalHandler = handler,
-        lookup = {};
+        lookup = {},
+        handlers;
     for (var i = 0, len = hamster.handlers.length; i < len; ++i) {
       lookup[hamster.handlers[i].original] = hamster.handlers[i];
     }
-    handler = lookup[originalHandler].normalised;
+    handlers = lookup[originalHandler];
+    handler = handlers.normalised;
 
-    if (handler) {
-      // cross-browser removeEventListener
-      hamster.element[Hamster.REMOVE_EVENT](Hamster.PREFIX + eventName, handler, useCapture || false);
-      // remove handler from the instance
-      hamster.handlers.splice(hamster.handlers.indexOf(handler), 1);
+    // cross-browser removeEventListener
+    hamster.element[Hamster.REMOVE_EVENT](Hamster.PREFIX + eventName, handler, useCapture || false);
+
+    // remove original and normalised handlers from the instance
+    for (var h in hamster.handlers) {
+      if (hamster.handlers[h] == handlers) {
+        hamster.handlers.splice(h, 1);
+        break;
+      }
     }
   }
 };
@@ -169,7 +175,7 @@ var lowestDelta,
 
 Hamster.normalise = {
   /**
-   * fix browser inconistencies
+   * fix browser inconsistencies
    */
   browser: function normaliseBrowser(){
     // detect deprecated wheel events
@@ -187,26 +193,6 @@ Hamster.normalise = {
       Hamster.PREFIX = 'on';
     }
 
-    // indexOf shim for IE < 9
-    if (!('indexOf' in Array.prototype)) {
-      Array.prototype.indexOf= function(find, i /*opt*/) {
-        if (i === undefined) {
-          i = 0;
-        }
-        if (i < 0) {
-          i += this.length;
-        }
-        if (i < 0) {
-          i = 0;
-        }
-        for (var n = this.length; i < n; ++i) {
-          if (i in this && this[i] === find) {
-            return i;
-          }
-        }
-        return -1;
-      };
-    }
   },
 
   /**
