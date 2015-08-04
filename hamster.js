@@ -120,7 +120,7 @@ Hamster.event = {
           delta = Hamster.normalise.delta(originalEvent);
 
       // fire the original handler with normalised arguments
-      return originalHandler(event, delta[0], delta[1], delta[2]);
+      return originalHandler(event, delta);
 
     };
 
@@ -302,7 +302,12 @@ Hamster.normalise = {
     deltaX = Math[fn](deltaX / lowestDeltaXY);
     deltaY = Math[fn](deltaY / lowestDeltaXY);
 
-    return [delta, deltaX, deltaY];
+    return {
+      delta: delta,
+      deltaX: deltaX,
+      deltaY: deltaY,
+      deltaFactor: lowestDelta
+    };
   }
 };
 
